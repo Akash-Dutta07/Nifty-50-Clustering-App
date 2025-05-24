@@ -5,8 +5,7 @@
 This project features an interactive **Streamlit** web application designed to **cluster Nifty 50 stocks** based on the similarities in their historical daily return patterns.
 
 The application provides a dynamic way to visualize and understand how different stocks within the Indian market move together — offering insights valuable for:
-
-- Portfolio analysis  
+  
 - Diversification strategies  
 - Identifying thematic groupings  
 
@@ -14,13 +13,11 @@ The application provides a dynamic way to visualize and understand how different
 
 ## ✨ Features
 
-- **📈 Dynamic Data Fetching:** Pulls historical **Adjusted Close prices** for 48 Nifty 50 constituents directly from Yahoo Finance.
+- **📈 Dynamic Data Fetching:** Pulls historical **Adjusted Close prices** for  Nifty 50 stocks constituents directly from Yahoo Finance.
 
 - **📅 Configurable History:** Users can select the number of years of historical data (1–10 years) via a **sidebar slider**.
 
-- **🔁 Robust API Handling:** Implements retry mechanisms with **exponential backoff** and **individual ticker fallbacks** to handle yfinance API rate limits gracefully.
-
-- **🧪 Automated Feature Engineering:** Calculates **daily percentage returns** and preprocesses the dataset for clustering.
+- **🧪 Feature Engineering:** Calculates **daily percentage returns** and preprocesses the dataset for clustering.
 
 - **🧠 Unsupervised Clustering:** Uses **KMeans** to group stocks based on return similarities.
 
