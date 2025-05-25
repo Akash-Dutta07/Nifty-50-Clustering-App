@@ -26,7 +26,26 @@ st.markdown("Cluster diverse financial assets based on their historical daily re
 # --- Sidebar Inputs ---
 # Reduced default n_years for faster initial load on Streamlit Cloud
 n_clusters = st.sidebar.slider("Select Number of Clusters", 2, 10, 4)
-n_years = st.sidebar.slider("Years of Historical Data", 1, 10, 2) 
+# Explanation for Number of Clusters slider
+st.sidebar.markdown(
+    """
+    <small>
+    This controls how many distinct groups (clusters) the algorithm will try to find
+    among the assets. A higher number means more granular groups.
+    </small>
+    """, unsafe_allow_html=True
+)
+
+n_years = st.sidebar.slider("Years of Historical Data", 1, 10, 2)
+# Explanation for Years of Historical Data slider
+st.sidebar.markdown(
+    """
+    <small>
+    Determines the length of past data used for analysis. More years provide
+    a longer historical context, but may increase loading time.
+    </small>
+    """, unsafe_allow_html=True
+)
 
 # --- Define Diverse Asset Tickers ---
 # This list is now the 10 diverse assets we discussed, not just Nifty 50 stocks.
@@ -214,6 +233,7 @@ try:
     else:
         st.write("✅ **Silhouette Score**: N/A (Could not be calculated)")
 
+    # Create a display-friendly Ticker column for the DataFrame
     clustered_df = pd.DataFrame({
         "Ticker": returns_T_data.index,
         "Cluster": labels,
@@ -221,23 +241,42 @@ try:
         "PCA2": pca_data[:, 1]
     }).sort_values(by="Cluster")
 
+    # Create a display-friendly Ticker column for the DataFrame and plot
+    # Remove '=X' suffix for currency tickers for cleaner display
+    clustered_df['Display_Ticker'] = clustered_df['Ticker'].apply(lambda x: x.replace('=X', '') if '=X' in x else x)
+
     st.subheader("Clustered Assets")
-    st.dataframe(clustered_df)
+    st.dataframe(clustered_df[['Display_Ticker', 'Cluster', 'PCA1', 'PCA2']]) # Display the new column
 
     # --- Plotting ---
     fig, ax = plt.subplots(figsize=(12, 8))
+    # Use 'Display_Ticker' for the text labels on the plot
     sns.scatterplot(data=clustered_df, x="PCA1", y="PCA2", hue="Cluster", palette="Set2", s=100, ax=ax)
     
-    # Add text labels for tickers
+    # Add text labels for tickers, using Display_Ticker for cleaner labels
     for i in range(clustered_df.shape[0]):
         # Adjust text offset slightly for better readability
         ax.text(clustered_df.PCA1.iloc[i] + 0.05, clustered_df.PCA2.iloc[i] + 0.05, 
-                clustered_df.Ticker.iloc[i], fontsize=8, alpha=0.8, 
+                clustered_df.Display_Ticker.iloc[i], fontsize=8, alpha=0.8, 
                 ha='left', va='bottom') # Horizontal/Vertical alignment for better positioning
 
     ax.set_title("Clustering of Diverse Financial Assets (PCA-Reduced)")
     ax.grid(True)
     st.pyplot(fig)
+
+    # --- Explanation for PCA Axes ---
+    st.markdown("---") # Separator for clarity
+    st.subheader("Understanding the PCA Plot Axes")
+    st.markdown(
+        """
+        This scatter plot visualizes the assets in a reduced 2-dimensional space using **Principal Component Analysis (PCA)**.
+        
+        * **PCA1 (Principal Component 1):** This axis captures the **largest amount of variance** (information) in the original high-dimensional daily return data. Assets that are far apart along this axis show the biggest differences in their overall return patterns.
+        * **PCA2 (Principal Component 2):** This axis captures the **second largest amount of variance** in the data, independent of PCA1. It helps to differentiate assets further in a direction not explained by PCA1.
+        
+        **Interpretation:** Assets that are plotted closer together in this 2D space have more similar historical daily return behaviors. The clusters (indicated by different colors) group these similar assets together. The exact numerical values on the axes (e.g., -10, 0, 10) are abstract and represent positions in this transformed space, not direct financial metrics.
+        """
+    )
 
 except Exception as e:
     st.error(f"An error occurred during clustering or plotting: {e}")
